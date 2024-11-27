@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>জমা-খরচ</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f1c40f;
+        }
+
+        body {
+            font-family: 'SolaimanLipi', Arial, sans-serif;
+            background-color: #f5f6fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--primary-color);
+            min-height: 100vh;
+            padding: 20px 0;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 250px;
+            transition: transform 0.3s ease-in-out;
+            z-index: 999;
+        }
+
+        .sidebar .nav-link {
+            color: #fff;
+            padding: 12px 20px;
+            margin: 4px 0;
+            border-radius: 5px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: var(--accent-color);
+        }
+
+        .sidebar .nav-link.active {
+            background-color: var(--accent-color);
+        }
+
+        .main-content {
+            margin-left: 250px; /* Width of the sidebar */
+            padding: 20px;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+                z-index: 1000;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-navbar {
+                display: block;
+            }
+        }
+
+        /* Statistics Cards */
+        .stat-card {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .income-stat {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+        }
+
+        .expense-stat {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .balance-stat {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }
+
+        .accounts-section {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .action-buttons button {
+            margin-right: 5px;
+        }
+
+        .report-card {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .report-card h4 {
+            margin-bottom: 20px;
+        }
+
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .required::after {
+            content: "*";
+            color: red;
+            margin-left: 4px;
+        }
+
+        /* মোট জমা ও মোট খরচ স্টাইল */
+        .total-section {
+            margin-top: 15px;
+        }
+
+        .total-section h5 {
+            font-weight: bold;
+        }
+
+        /* Adjusting table for mobile */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        /* Adjust font sizes for better readability on mobile */
+        @media (max-width: 576px) {
+            .stat-card h4 {
+                font-size: 1rem;
+            }
+
+            .stat-card h2 {
+                font-size: 1.5rem;
+            }
+
+            .report-card p {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Loading Indicator */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        #loading.d-none {
+            display: none;
+        }
+
+        /* User Info in Sidebar */
+        .sidebar .user-info {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar .user-info img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .sidebar .user-info .user-name {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        /* Mobile Navbar */
+        .mobile-navbar {
+            display: none;
+            background-color: var(--primary-color);
+            padding: 10px 20px;
+            color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+        }
+
+        .mobile-navbar .toggle-btn {
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Indicator -->
+    <div id="loading" class="d-none">লোড হচ্ছে...</div>
+
+    <!-- Mobile Navbar -->
+    <nav class="mobile-navbar d-lg-none">
+        <span class="toggle-btn"><i class="bi bi-list"></i></span>
+        <span class="ms-3">আওয়ার হোম</span>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <div class="text-center mb-4 d-none d-lg-block">
+                    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50'><rect width='50' height='50' fill='white'/><text x='50%' y='50%' text-anchor='middle' dy='.3em' fill='black' font-size='20'>🏠</text></svg>" 
+                         alt="Logo" class="img-fluid" style="max-width: 50px;">
+                    <h4 class="text-white mt-2">আওয়ার হোম</h4>
+                </div>
+                <!-- User Info -->
+                <div class="user-info">
+                    <img src="https://via.placeholder.com/35" alt="User Image">
+                    <span id="userName" class="user-name">ব্যবহারকারী</span>
+                </div>
+                <ul class="nav flex-column">
+                    <!-- Dashboard Menu -->
+                    <li class="nav-item">
+                        <a class="nav-link active" href="dashboard/dashboard.html"><i class="bi bi-speedometer2"></i> ড্যাশবোর্ড</a>
+                    </li>
+                    <!-- Logout Menu -->
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-danger text-white mt-3" href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> লগআউট</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+               <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="stat-card income-stat">
+                            <h4>মোট আমানত</h4>
+                            <h2 id="totalIncome">৳ 0</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card expense-stat">
+                            <h4>মোট খরচ</h4>
+                            <h2 id="totalExpense">৳ 0</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card balance-stat">
+                            <h4>বর্তমান অবস্থা</h4>
+                            <h2 id="currentBalance">৳ 0</h2>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Month and Year Selector -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="monthSelector" class="form-label">মাস নির্বাচন করুন</label>
+                            <select class="form-select" id="monthSelector">
+                                <!-- Months options -->
+                                <option value="0">জানুয়ারী</option>
+                                <option value="1">ফেব্রুয়ারী</option>
+                                <option value="2">মার্চ</option>
+                                <option value="3">এপ্রিল</option>
+                                <option value="4">মে</option>
+                                <option value="5">জুন</option>
+                                <option value="6">জুলাই</option>
+                                <option value="7">আগস্ট</option>
+                                <option value="8">সেপ্টেম্বর</option>
+                                <option value="9">অক্টোবর</option>
+                                <option value="10">নভেম্বর</option>
+                                <option value="11">ডিসেম্বর</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="yearSelector" class="form-label">বছর নির্বাচন করুন</label>
+                            <select class="form-select" id="yearSelector">
+                                <!-- Year options (from current year - 5 to current year + 5) -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deposit and Expense Sections -->
+                <div class="row">
+                    <!-- Deposit Section -->
+                    <div class="col-md-6 mb-4">
+                        <div class="accounts-section">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3>জমা তালিকা</h3>
+                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addDepositModal">
+                                    <i class="bi bi-plus-circle"></i> নতুন জমা
+                                </button>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ক্রমিক নম্বর</th>
+                                            <th>নাম</th>
+                                            <th>ফ্ল্যাট নম্বর</th>
+                                            <th>তারিখ</th>
+                                            <th>পরিমাণ (৳)</th>
+                                            <th>ক্রিয়াকলাপ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="depositTableBody">
+                                        <!-- জমা ডেটা এখানে যোগ হবে -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- মোট জমা দেখানোর অংশ -->
+                            <div class="total-section">
+                                <h5>মোট জমা: <span id="totalDeposits">৳ 0</span></h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expense Section -->
+                    <div class="col-md-6 mb-4">
+                        <div class="accounts-section">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3>খরচ তালিকা</h3>
+                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
+                                    <i class="bi bi-plus-circle"></i> নতুন খরচ
+                                </button>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ক্রমিক নম্বর</th>
+                                            <th>বিবরণ</th>
+                                            <th>তারিখ</th>
+                                            <th>পরিমাণ (৳)</th>
+                                            <th>ক্রিয়াকলাপ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="expenseTableBody">
+                                        <!-- খরচ ডেটা এখানে যোগ হবে -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- মোট খরচ দেখানোর অংশ -->
+                            <div class="total-section">
+                                <h5>মোট খরচ: <span id="totalExpenses">৳ 0</span></h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- লোন (Loan) Section -->
+                <div class="row">
+                    <div class="col-md-12 mb-4">
+                        <div class="accounts-section">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3>লোন</h3>
+                                <div>
+                                    <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addLoanModal">
+                                        <i class="bi bi-plus-circle"></i> নতুন লোন গ্রহন
+                                    </button>
+                                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#repayLoanModal">
+                                        <i class="bi bi-arrow-left-right"></i> লোন পরিশোধ
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>ক্রমিক নং</th>
+                                            <th>সদস্যের নাম ও ফ্ল্যাট নম্বর</th>
+                                            <th>লোন গ্রহণ (৳)</th>
+                                            <th>লোন পরিশোধ (৳)</th>
+                                            <th>ক্রিয়াকলাপ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="loanTableBody">
+                                        <!-- লোন ডেটা এখানে যোগ হবে -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- রিপোর্ট কার্ড -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="report-card">
+                            <h4>মাসিক রিপোর্ট</h4>
+                            <p>A = মোট জমা – (মোট খরচ + মোট গ্রহন লোন) = এই <span id="currentMonthNameReport">মাসের নাম</span> মাসের ব্যালেন্স আছে: <span id="balanceA">৳ 0</span></p>
+                            <p>B = পূর্ববতী মাস অর্থাৎ <span id="previousBalanceText">পূর্ববর্তী মাসের B</span> + এই মাসের <span id="balanceAValue">A</span> = মোট ব্যালেন্স: <span id="balanceB">৳ 0</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Deposit Modal -->
+        <div class="modal fade" id="addDepositModal" tabindex="-1">
+            <div class="modal-dialog modal-fullscreen-sm-down">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">নতুন জমা যোগ করুন</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="depositForm">
+                            <div class="mb-3">
+                                <label class="form-label required">সদস্য নির্বাচন করুন</label>
+                                <select class="form-select" id="memberDropdown" name="memberId" required>
+                                    <option value="">সদস্য নির্বাচন করুন</option>
+                                    <!-- সদস্যদের ড্রপডাউন অপশন এখানে যোগ হবে -->
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">তারিখ</label>
+                                <input type="date" class="form-control" name="date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">পরিমাণ (৳)</label>
+                                <input type="number" class="form-control" name="amount" value="1600" min="0" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                        <button type="button" class="btn btn-success" onclick="saveDeposit()">সংরক্ষণ করুন</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Expense Modal -->
+        <div class="modal fade" id="addExpenseModal" tabindex="-1">
+            <div class="modal-dialog modal-fullscreen-sm-down">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">নতুন খরচ যোগ করুন</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="expenseForm">
+                            <div class="mb-3">
+                                <label class="form-label required">বিবরণ</label>
+                                <input type="text" class="form-control" name="description" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">তারিখ</label>
+                                <input type="date" class="form-control" name="date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">পরিমাণ (৳)</label>
+                                <input type="number" class="form-control" name="amount" min="0" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                        <button type="button" class="btn btn-danger" onclick="saveExpense()">সংরক্ষণ করুন</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Loan Modal -->
+        <div class="modal fade" id="addLoanModal" tabindex="-1">
+            <div class="modal-dialog modal-fullscreen-sm-down">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">নতুন লোন গ্রহন করুন</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="loanForm">
+                            <div class="mb-3">
+                                <label class="form-label required">সদস্য নির্বাচন করুন</label>
+                                <select class="form-select" id="loanMemberDropdown" name="memberId" required>
+                                    <option value="">সদস্য নির্বাচন করুন</option>
+                                    <!-- সদস্যদের ড্রপডাউন অপশন এখানে যোগ হবে -->
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">তারিখ</label>
+                                <input type="date" class="form-control" name="date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">পরিমাণ (৳)</label>
+                                <input type="number" class="form-control" name="amount" min="1000" required>
+                                <small class="form-text text-muted">লোনের জন্য আপনার ব্যালেন্স ১০০০ টাকার বেশি হতে হবে।</small>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                        <button type="button" class="btn btn-primary" onclick="saveLoan()">সংরক্ষণ করুন</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Repay Loan Modal -->
+        <div class="modal fade" id="repayLoanModal" tabindex="-1">
+            <div class="modal-dialog modal-fullscreen-sm-down">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">লোন পরিশোধ করুন</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="repayLoanForm">
+                            <div class="mb-3">
+                                <label class="form-label required">সদস্য নির্বাচন করুন</label>
+                                <select class="form-select" id="repayLoanMemberDropdown" name="memberId" required>
+                                    <option value="">সদস্য নির্বাচন করুন</option>
+                                    <!-- সদস্যদের ড্রপডাউন অপশন এখানে যোগ হবে -->
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">তারিখ</label>
+                                <input type="date" class="form-control" name="date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label required">পরিমাণ (৳)</label>
+                                <input type="number" class="form-control" name="amount" min="1" required>
+                                <small class="form-text text-muted">পরিশোধের পরিমাণ আপনার লোনের পরিমাণের সাথে সামঞ্জস্যপূর্ণ হতে হবে।</small>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                        <button type="button" class="btn btn-warning" onclick="repayLoan()">পরিশোধ করুন</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Firebase SDKs -->
+        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Custom JS -->
+        <script>
+            // Firebase Config
+            const firebaseConfig = {
+                apiKey: "AIzaSyDyqtGf8OF9i2P0hWjVeVtcYur7-GR63Fg",
+                authDomain: "ourhome-62e06.firebaseapp.com",
+                projectId: "ourhome-62e06",
+                storageBucket: "ourhome-62e06.appspot.com",
+                messagingSenderId: "627342353652",
+                appId: "1:627342353652:web:e5e4d54c64efced56beaa1",
+                measurementId: "G-4TNF5BRP15"
+            };
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+            const auth = firebase.auth();
+
+            // DOM Elements
+            const memberDropdown = document.getElementById('memberDropdown');
+            const loanMemberDropdown = document.getElementById('loanMemberDropdown');
+            const repayLoanMemberDropdown = document.getElementById('repayLoanMemberDropdown');
+            const depositTableBody = document.getElementById('depositTableBody');
+            const expenseTableBody = document.getElementById('expenseTableBody');
+            const loanTableBody = document.getElementById('loanTableBody');
+            const totalIncomeElem = document.getElementById('totalIncome');
+            const totalExpenseElem = document.getElementById('totalExpense');
+            const currentBalanceElem = document.getElementById('currentBalance');
+            const totalDepositsElem = document.getElementById('totalDeposits');
+            const totalExpensesElem = document.getElementById('totalExpenses');
+            const currentMonthNameElem = document.getElementById('currentMonthNameReport');
+            const balanceAElem = document.getElementById('balanceA');
+            const balanceBElem = document.getElementById('balanceB');
+            const previousBalanceTextElem = document.getElementById('previousBalanceText');
+            const balanceAValueElem = document.getElementById('balanceAValue');
+            const monthSelector = document.getElementById('monthSelector');
+            const yearSelector = document.getElementById('yearSelector');
+            const loadingIndicator = document.getElementById('loading');
+            const userNameElem = document.getElementById('userName');
+            const userImageElem = document.querySelector('.user-info img');
+            const toggleBtn = document.querySelector('.mobile-navbar .toggle-btn');
+            const sidebar = document.querySelector('.sidebar');
+
+            // Default Expenses
+            const defaultExpenses = [
+                "দারোয়ানের বেতন",
+                "কমন বিদ্যুৎ মিটার",
+                "লিফট সার্ভিস চার্জ",
+                "সিড়ি ঝাড়ু",
+                "ময়লার বিল"
+            ];
+
+            /**
+             * Populate multiple dropdowns with the same options
+             * @param {Array} options - Array of option elements
+             * @param {Array} dropdowns - Array of dropdown elements to populate
+             */
+            function populateDropdowns(options, dropdowns) {
+                dropdowns.forEach(dropdown => {
+                    dropdown.innerHTML = '<option value="">সদস্য নির্বাচন করুন</option>'; // Reset dropdown
+                    options.forEach(option => {
+                        const clonedOption = option.cloneNode(true);
+                        dropdown.appendChild(clonedOption);
+                    });
+                });
+            }
+
+            /**
+             * Fetch Members and Populate Dropdowns
+             */
+            function fetchMembers() {
+                db.collection("members").orderBy("name").get()
+                    .then((querySnapshot) => {
+                        if (querySnapshot.empty) {
+                            console.warn("সদস্য কালেকশন খালি।");
+                            alert("সদস্য কালেকশন খালি। দয়া করে নতুন সদস্য যোগ করুন।");
+                            return;
+                        }
+                        const options = [];
+                        querySnapshot.forEach((doc) => {
+                            const member = doc.data();
+                            // Check if both name and flatNo exist
+                            let optionText = "";
+                            if (member.name && member.flatNo) {
+                                optionText = `${member.name} (${member.flatNo})`;
+                            } else {
+                                console.warn(`Member document ${doc.id} is missing name or flatNo.`);
+                                const name = member.name || "নাম অনুপস্থিত";
+                                const flatNo = member.flatNo || "ফ্ল্যাট নম্বর অনুপস্থিত";
+                                optionText = `${name} (${flatNo})`;
+                            }
+                            const option = document.createElement('option');
+                            option.value = doc.id;
+                            option.textContent = optionText;
+                            options.push(option);
+                        });
+                        populateDropdowns(options, [memberDropdown, loanMemberDropdown, repayLoanMemberDropdown]);
+                    })
+                    .catch((error) => {
+                        console.error("সদস্য ফেচ করতে সমস্যা হয়েছে: ", error);
+                        alert('সদস্য ফেচ করতে সমস্যা হয়েছে: ' + error.message);
+                    });
+            }
+
+            /**
+             * Initialize Default Expenses
+             */
+            function initializeDefaultExpenses() {
+                const promises = defaultExpenses.map((description) => {
+                    return db.collection("expenses").where("description", "==", description).get()
+                        .then((snapshot) => {
+                            if (snapshot.empty) {
+                                // Add default expense
+                                return db.collection("expenses").add({
+                                    description: description,
+                                    date: new Date().toISOString().split('T')[0],
+                                    amount: 0
+                                }).then(() => {
+                                    console.log(`Default expense "${description}" added.`);
+                                }).catch((error) => {
+                                    console.error(`Error adding default expense "${description}": `, error);
+                                });
+                            } else {
+                                console.log(`Default expense "${description}" already exists.`);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error(`Error checking default expense "${description}": `, error);
+                        });
+                });
+                return Promise.all(promises);
+            }
+
+            /**
+             * Fetch and Render Deposits Based on Selected Month and Year
+             * @param {number} year 
+             * @param {number} month 
+             */
+            function fetchDeposits(year, month) {
+                showLoading();
+                depositTableBody.innerHTML = '';
+                let totalDeposits = 0;
+                const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+                const endMonth = month === 11 ? 0 : month + 1;
+                const endYear = month === 11 ? year + 1 : year;
+                const endDate = `${endYear}-${String(endMonth + 1).padStart(2, '0')}-01`;
+
+                db.collection("deposits")
+                    .where("date", ">=", startDate)
+                    .where("date", "<", endDate)
+                    .orderBy("date", "desc")
+                    .get()
+                    .then((querySnapshot) => {
+                        depositTableBody.innerHTML = '';
+                        let index = 1;
+                        let localTotalDeposits = 0;
+                        querySnapshot.forEach((doc) => {
+                            const deposit = doc.data();
+                            // Check if flatNo is defined
+                            if (!deposit.flatNo) {
+                                console.warn(`Deposit document ${doc.id} is missing flatNo.`);
+                                return; // Skip this deposit
+                            }
+                            localTotalDeposits += deposit.amount || 0; // মোট জমা যোগ করা
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${index}</td>
+                                <td>${deposit.name}</td>
+                                <td>${deposit.flatNo}</td>
+                                <td>${formatDate(deposit.date)}</td>
+                                <td>${formatNumber(deposit.amount)}</td>
+                                <td class="action-buttons">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editDeposit('${doc.id}')">✏️</button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteDeposit('${doc.id}')">🗑️</button>
+                                </td>
+                            `;
+                            depositTableBody.appendChild(tr);
+                            index++;
+                        });
+                        totalDepositsElem.textContent = formatNumber(localTotalDeposits);
+                        hideLoading();
+                    })
+                    .catch((error) => {
+                        console.error("জমা ফেচ করতে সমস্যা হয়েছে: ", error);
+                        hideLoading();
+                    });
+            }
+
+            /**
+             * Fetch and Render Expenses Based on Selected Month and Year
+             * @param {number} year 
+             * @param {number} month 
+             */
+            function fetchExpenses(year, month) {
+                showLoading();
+                expenseTableBody.innerHTML = '';
+                let totalExpenses = 0;
+                const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+                const endMonth = month === 11 ? 0 : month + 1;
+                const endYear = month === 11 ? year + 1 : year;
+                const endDate = `${endYear}-${String(endMonth + 1).padStart(2, '0')}-01`;
+
+                db.collection("expenses")
+                    .where("date", ">=", startDate)
+                    .where("date", "<", endDate)
+                    .orderBy("date", "desc")
+                    .get()
+                    .then((querySnapshot) => {
+                        expenseTableBody.innerHTML = '';
+                        let index = 1;
+                        let localTotalExpenses = 0;
+                        querySnapshot.forEach((doc) => {
+                            const expense = doc.data();
+                            localTotalExpenses += expense.amount || 0; // মোট খরচ যোগ করা
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${index}</td>
+                                <td>${expense.description}</td>
+                                <td>${formatDate(expense.date)}</td>
+                                <td>${formatNumber(expense.amount)}</td>
+                                <td class="action-buttons">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editExpense('${doc.id}')">✏️</button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteExpense('${doc.id}')">🗑️</button>
+                                </td>
+                            `;
+                            expenseTableBody.appendChild(tr);
+                            index++;
+                        });
+                        totalExpensesElem.textContent = formatNumber(localTotalExpenses);
+                        hideLoading();
+                    })
+                    .catch((error) => {
+                        console.error("খরচ ফেচ করতে সমস্যা হয়েছে: ", error);
+                        hideLoading();
+                    });
+            }
+
+            /**
+             * Fetch and Render Loans Based on Selected Month and Year
+             * @param {number} year 
+             * @param {number} month 
+             */
+            function fetchLoans(year, month) {
+                showLoading();
+                loanTableBody.innerHTML = '';
+                const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+                const endMonth = month === 11 ? 0 : month + 1;
+                const endYear = month === 11 ? year + 1 : year;
+                const endDate = `${endYear}-${String(endMonth + 1).padStart(2, '0')}-01`;
+
+                db.collection("loans")
+                    .where("date", ">=", startDate)
+                    .where("date", "<", endDate)
+                    .orderBy("date", "desc")
+                    .get()
+                    .then((querySnapshot) => {
+                        const loanData = {};
+                        querySnapshot.forEach((doc) => {
+                            const loan = doc.data();
+                            const memberId = loan.memberId;
+                            if (!loanData[memberId]) {
+                                loanData[memberId] = {
+                                    name: loan.memberName,
+                                    flatNo: loan.flatNo,
+                                    loanTaken: 0,
+                                    loanRepaid: 0
+                                };
+                            }
+                            if (loan.type === "loan") {
+                                loanData[memberId].loanTaken += loan.amount;
+                            } else if (loan.type === "repayment") {
+                                loanData[memberId].loanRepaid += loan.amount;
+                            }
+                        });
+
+                        // Convert loanData object to array
+                        const loanArray = Object.keys(loanData).map((memberId) => ({
+                            memberId,
+                            ...loanData[memberId]
+                        }));
+
+                        // Render the table
+                        loanTableBody.innerHTML = '';
+                        loanArray.forEach((loan, index) => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${index + 1}</td>
+                                <td>${loan.name} (${loan.flatNo})</td>
+                                <td>${formatNumber(loan.loanTaken)}</td>
+                                <td>${formatNumber(loan.loanRepaid)}</td>
+                                <td class="action-buttons">
+                                    <button class="btn btn-sm btn-outline-info" onclick="viewLoanDetails('${loan.memberId}')">👁️</button>
+                                </td>
+                            `;
+                            loanTableBody.appendChild(tr);
+                        });
+                        hideLoading();
+                    })
+                    .catch((error) => {
+                        console.error("লোন ফেচ করতে সমস্যা হয়েছে: ", error);
+                        hideLoading();
+                    });
+            }
+
+            /**
+             * Save Deposit to Firestore
+             */
+            function saveDeposit() {
+                const form = document.getElementById('depositForm');
+                const formData = new FormData(form);
+                const memberId = formData.get('memberId');
+                const date = formData.get('date');
+                const amount = parseFloat(formData.get('amount'));
+
+                if (!memberId) {
+                    alert('অনুগ্রহ করে সদস্য নির্বাচন করুন!');
+                    return;
+                }
+
+                // Fetch member details
+                db.collection("members").doc(memberId).get().then((doc) => {
+                    if (doc.exists) {
+                        const member = doc.data();
+                        // Validate member data
+                        if (!member.name || !member.flatNo) {
+                            alert('নির্বাচিত সদস্যের নাম বা ফ্ল্যাট নম্বর অনুপস্থিত!');
+                            return;
+                        }
+
+                        const deposit = {
+                            name: member.name,
+                            flatNo: member.flatNo,
+                            date: date,
+                            amount: amount
+                        };
+
+                        db.collection("deposits").add(deposit)
+                            .then(() => {
+                                alert('জমা সফলভাবে সংরক্ষণ করা হয়েছে!');
+                                form.reset();
+                                const depositModal = bootstrap.Modal.getInstance(document.getElementById('addDepositModal'));
+                                depositModal.hide();
+                                // Refresh data
+                                fetchAndUpdate();
+                            })
+                            .catch((error) => {
+                                console.error("জমা সংরক্ষণ করতে সমস্যা হয়েছে: ", error);
+                                alert('জমা সংরক্ষণ করতে সমস্যা হয়েছে: ' + error.message);
+                            });
+                    } else {
+                        alert("নির্বাচিত সদস্য পাওয়া যায়নি!");
+                    }
+                }).catch((error) => {
+                    console.error("সদস্য ডেটা আনতে সমস্যা হয়েছে: ", error);
+                    alert('সদস্য ডেটা আনতে সমস্যা হয়েছে: ' + error.message);
+                });
+            }
+
+            /**
+             * Save Expense to Firestore
+             */
+            function saveExpense() {
+                const form = document.getElementById('expenseForm');
+                const formData = new FormData(form);
+                const description = formData.get('description').trim();
+                const date = formData.get('date');
+                const amount = parseFloat(formData.get('amount'));
+
+                if (!description) {
+                    alert('অনুগ্রহ করে বিবরণ প্রদান করুন!');
+                    return;
+                }
+
+                const expense = {
+                    description: description,
+                    date: date,
+                    amount: amount
+                };
+
+                db.collection("expenses").add(expense)
+                    .then(() => {
+                        alert('খরচ সফলভাবে সংরক্ষণ করা হয়েছে!');
+                        form.reset();
+                        const expenseModal = bootstrap.Modal.getInstance(document.getElementById('addExpenseModal'));
+                        expenseModal.hide();
+                        // Refresh data
+                        fetchAndUpdate();
+                    })
+                    .catch((error) => {
+                        console.error("খরচ সংরক্ষণ করতে সমস্যা হয়েছে: ", error);
+                        alert('খরচ সংরক্ষণ করতে সমস্যা হয়েছে: ' + error.message);
+                    });
+            }
+
+            /**
+             * Save Loan to Firestore
+             */
+            function saveLoan() {
+                const form = document.getElementById('loanForm');
+                const formData = new FormData(form);
+                const memberId = formData.get('memberId');
+                const date = formData.get('date');
+                const amount = parseFloat(formData.get('amount'));
+
+                if (!memberId) {
+                    alert('অনুগ্রহ করে সদস্য নির্বাচন করুন!');
+                    return;
+                }
+
+                // Fetch member details
+                db.collection("members").doc(memberId).get().then((doc) => {
+                    if (doc.exists) {
+                        const member = doc.data();
+                        // Validate member data
+                        if (!member.name || !member.flatNo) {
+                            alert('নির্বাচিত সদস্যের নাম বা ফ্ল্যাট নম্বর অনুপস্থিত!');
+                            return;
+                        }
+
+                        // Fetch current balance
+                        db.collection("deposits").get().then((depositsSnapshot) => {
+                            let totalDeposits = 0;
+                            depositsSnapshot.forEach((doc) => {
+                                const deposit = doc.data();
+                                totalDeposits += deposit.amount || 0;
+                            });
+
+                            db.collection("expenses").get().then((expensesSnapshot) => {
+                                let totalExpenses = 0;
+                                expensesSnapshot.forEach((doc) => {
+                                    const expense = doc.data();
+                                    totalExpenses += expense.amount || 0;
+                                });
+
+                                db.collection("loans").get().then((loansSnapshot) => {
+                                    let totalLoanTaken = 0;
+                                    let totalLoanRepaid = 0;
+                                    loansSnapshot.forEach((doc) => {
+                                        const loan = doc.data();
+                                        if (loan.type === "loan") {
+                                            totalLoanTaken += loan.amount;
+                                        } else if (loan.type === "repayment") {
+                                            totalLoanRepaid += loan.amount;
+                                        }
+                                    });
+
+                                    const currentBalance = totalDeposits - totalExpenses - totalLoanTaken + totalLoanRepaid;
+
+                                    // Check if current balance is greater than 1000 টাকা
+                                    if (currentBalance <= 1000) {
+                                        alert('পর্যাপ্ত ব্যালেন্স নেই।');
+                                        return;
+                                    }
+
+                                    if (amount < 1000) {
+                                        alert('লোনের পরিমাণ ১০০০ টাকার কম হতে পারে না!');
+                                        return;
+                                    }
+
+                                    // Create loan entry
+                                    const loan = {
+                                        memberId: memberId,
+                                        memberName: member.name,
+                                        flatNo: member.flatNo,
+                                        type: "loan",
+                                        amount: amount,
+                                        date: date
+                                    };
+
+                                    db.collection("loans").add(loan)
+                                        .then(() => {
+                                            alert('লোন সফলভাবে সংরক্ষণ করা হয়েছে!');
+                                            form.reset();
+                                            const loanModal = bootstrap.Modal.getInstance(document.getElementById('addLoanModal'));
+                                            loanModal.hide();
+                                            // Update balance
+                                            updateBalanceOnLoanTaken(amount);
+                                            // Refresh data
+                                            fetchAndUpdate();
+                                        })
+                                        .catch((error) => {
+                                            console.error("লোন সংরক্ষণ করতে সমস্যা হয়েছে: ", error);
+                                            alert('লোন সংরক্ষণ করতে সমস্যা হয়েছে: ' + error.message);
+                                        });
+                                }).catch((error) => {
+                                    console.error("লোন ডেটা ফেচ করতে সমস্যা হয়েছে: ", error);
+                                });
+                            }).catch((error) => {
+                                console.error("খরচ ডেটা ফেচ করতে সমস্যা হয়েছে: ", error);
+                            });
+                        }).catch((error) => {
+                            console.error("জমা ডেটা ফেচ করতে সমস্যা হয়েছে: ", error);
+                        });
+                    } else {
+                        alert("নির্বাচিত সদস্য পাওয়া যায়নি!");
+                    }
+                }).catch((error) => {
+                    console.error("সদস্য ডেটা আনতে সমস্যা হয়েছে: ", error);
+                    alert('সদস্য ডেটা আনতে সমস্যা হয়েছে: ' + error.message);
+                });
+            }
+
+            /**
+             * Repay Loan to Firestore
+             */
+            function repayLoan() {
+                const form = document.getElementById('repayLoanForm');
+                const formData = new FormData(form);
+                const memberId = formData.get('memberId');
+                const date = formData.get('date');
+                const amount = parseFloat(formData.get('amount'));
+
+                if (!memberId) {
+                    alert('অনুগ্রহ করে সদস্য নির্বাচন করুন!');
+                    return;
+                }
+
+                // Fetch member's total loan taken and repaid
+                db.collection("loans").where("memberId", "==", memberId).get()
+                    .then((querySnapshot) => {
+                        let totalLoanTaken = 0;
+                        let totalLoanRepaid = 0;
+                        let memberName = "";
+                        let flatNo = "";
+                        querySnapshot.forEach((doc) => {
+                            const loan = doc.data();
+                            if (loan.type === "loan") {
+                                totalLoanTaken += loan.amount;
+                                memberName = loan.memberName;
+                                flatNo = loan.flatNo;
+                            } else if (loan.type === "repayment") {
+                                totalLoanRepaid += loan.amount;
+                            }
+                        });
+
+                        const outstandingLoan = totalLoanTaken - totalLoanRepaid;
+                        if (outstandingLoan <= 0) {
+                            alert('এই সদস্যের কোনো বাকি লোন নেই!');
+                            return;
+                        }
+
+                        if (amount > outstandingLoan) {
+                            alert(`আপনি শুধুমাত্র ৳ ${formatNumber(outstandingLoan)} পরিমাণই পরিশোধ করতে পারেন!`);
+                            return;
+                        }
+
+                        // Create repayment entry
+                        const repayment = {
+                            memberId: memberId,
+                            memberName: memberName,
+                            flatNo: flatNo,
+                            type: "repayment",
+                            amount: amount,
+                            date: date
+                        };
+
+                        db.collection("loans").add(repayment)
+                            .then(() => {
+                                alert('লোন পরিশোধ সফলভাবে সম্পন্ন হয়েছে!');
+                                form.reset();
+                                const repayLoanModal = bootstrap.Modal.getInstance(document.getElementById('repayLoanModal'));
+                                repayLoanModal.hide();
+                                // Update balance
+                                updateBalanceOnLoanRepaid(amount);
+                                // Refresh data
+                                fetchAndUpdate();
+                            })
+                            .catch((error) => {
+                                console.error("লোন পরিশোধ করতে সমস্যা হয়েছে: ", error);
+                                alert('লোন পরিশোধ করতে সমস্যা হয়েছে: ' + error.message);
+                            });
+                    })
+                    .catch((error) => {
+                        console.error("লোন ডেটা ফেচ করতে সমস্যা হয়েছে: ", error);
+                        alert('লোন ডেটা ফেচ করতে সমস্যা হয়েছে: ' + error.message);
+                    });
+            }
+
+            /**
+             * View Loan Details
+             * @param {string} memberId 
+             */
+            function viewLoanDetails(memberId) {
+                showLoading();
+                // Fetch all loan and repayment entries for the member
+                db.collection("loans").where("memberId", "==", memberId).orderBy("date", "asc").get()
+                    .then((querySnapshot) => {
+                        hideLoading();
+                        if (querySnapshot.empty) {
+                            alert("এই সদস্যের কোনো লোন তথ্য পাওয়া যায়নি!");
+                            return;
+                        }
+
+                        let loanDetails = `সদস্য: ${querySnapshot.docs[0].data().memberName} (${querySnapshot.docs[0].data().flatNo})\n\n`;
+                        loanDetails += "তারিখ\t\t\tপরিমাণ (৳)\t\tধরণ\n";
+                        loanDetails += "---------------------------------------------------------\n";
+
+                        let totalLoanTaken = 0;
+                        let totalLoanRepaid = 0;
+
+                        querySnapshot.forEach((doc) => {
+                            const loan = doc.data();
+                            const date = formatDate(loan.date);
+                            if (loan.type === "loan") {
+                                totalLoanTaken += loan.amount;
+                                loanDetails += `${date}\t\t৳ ${formatNumber(loan.amount)}\t\tলোন গ্রহণ\n`;
+                            } else if (loan.type === "repayment") {
+                                totalLoanRepaid += loan.amount;
+                                loanDetails += `${date}\t\t৳ ${formatNumber(loan.amount)}\t\tলোন পরিশোধ\n`;
+                            }
+                        });
+
+                        const outstandingLoan = totalLoanTaken - totalLoanRepaid;
+                        const status = outstandingLoan > 0 ? "Active" : "Closed";
+
+                        loanDetails += "\n";
+                        loanDetails += `মোট লোন গ্রহণ: ${formatNumber(totalLoanTaken)}\n`;
+                        loanDetails += `মোট লোন পরিশোধ: ${formatNumber(totalLoanRepaid)}\n`;
+                        loanDetails += `স্ট্যাটাস: ${status}`;
+
+                        alert(loanDetails);
+                    })
+                    .catch((error) => {
+                        hideLoading();
+                        console.error("লোন বিস্তারিত দেখাতে সমস্যা হয়েছে: ", error);
+                        alert('লোন বিস্তারিত দেখাতে সমস্যা হয়েছে: ' + error.message);
+                    });
+            }
+
+            /**
+             * Edit Deposit
+             * @param {string} depositId 
+             */
+            function editDeposit(depositId) {
+                const depositRef = db.collection("deposits").doc(depositId);
+                depositRef.get().then((doc) => {
+                    if (doc.exists) {
+                        const deposit = doc.data();
+                        const newName = prompt("নাম পরিবর্তন করুন:", deposit.name);
+                        if (newName === null) return; // Cancelled
+
+                        const newFlatNo = prompt("ফ্ল্যাট নম্বর পরিবর্তন করুন:", deposit.flatNo);
+                        if (newFlatNo === null) return; // Cancelled
+
+                        const newDate = prompt("তারিখ পরিবর্তন করুন (YYYY-MM-DD):", deposit.date);
+                        if (newDate === null) return; // Cancelled
+
+                        const newAmount = prompt("পরিমাণ পরিবর্তন করুন (৳):", deposit.amount);
+                        if (newAmount === null) return; // Cancelled
+
+                        // Validate inputs
+                        const updatedAmount = parseFloat(newAmount);
+                        if (isNaN(updatedAmount) || updatedAmount < 0) {
+                            alert('অনুগ্রহ করে একটি বৈধ পরিমাণ প্রদান করুন!');
+                            return;
+                        }
+
+                        depositRef.update({
+                            name: newName.trim() === '' ? deposit.name : newName,
+                            flatNo: newFlatNo.trim() === '' ? deposit.flatNo : newFlatNo,
+                            date: newDate.trim() === '' ? deposit.date : newDate,
+                            amount: updatedAmount
+                        })
+                        .then(() => {
+                            alert('জমা সফলভাবে আপডেট করা হয়েছে!');
+                            // Refresh data
+                            fetchAndUpdate();
+                        })
+                        .catch((error) => {
+                            console.error("জমা আপডেট করতে সমস্যা হয়েছে: ", error);
+                            alert('জমা আপডেট করতে সমস্যা হয়েছে: ' + error.message);
+                        });
+                    } else {
+                        alert("এই জমাটি পাওয়া যায়নি!");
+                    }
+                }).catch((error) => {
+                    console.error("জমা ডেটা আনতে সমস্যা হয়েছে: ", error);
+                    alert('জমা ডেটা আনতে সমস্যা হয়েছে: ' + error.message);
+                });
+            }
+
+            /**
+             * Delete Deposit
+             * @param {string} depositId 
+             */
+            function deleteDeposit(depositId) {
+                if (confirm('আপনি কি এই জমাটি মুছে ফেলতে চান?')) {
+                    showLoading();
+                    db.collection("deposits").doc(depositId).delete()
+                        .then(() => {
+                            alert('জমা সফলভাবে মুছে ফেলা হয়েছে!');
+                            // Refresh data
+                            fetchAndUpdate();
+                            hideLoading();
+                        })
+                        .catch((error) => {
+                            hideLoading();
+                            console.error("জমা মুছে ফেলতে সমস্যা হয়েছে: ", error);
+                            alert('জমা মুছে ফেলতে সমস্যা হয়েছে: ' + error.message);
+                        });
+                }
+            }
+
+            /**
+             * Edit Expense
+             * @param {string} expenseId 
+             */
+            function editExpense(expenseId) {
+                const expenseRef = db.collection("expenses").doc(expenseId);
+                expenseRef.get().then((doc) => {
+                    if (doc.exists) {
+                        const expense = doc.data();
+                        const newDescription = prompt("বিবরণ পরিবর্তন করুন:", expense.description);
+                        if (newDescription === null) return; // Cancelled
+
+                        const newDate = prompt("তারিখ পরিবর্তন করুন (YYYY-MM-DD):", expense.date);
+                        if (newDate === null) return; // Cancelled
+
+                        const newAmount = prompt("পরিমাণ পরিবর্তন করুন (৳):", expense.amount);
+                        if (newAmount === null) return; // Cancelled
+
+                        // Validate inputs
+                        const updatedAmount = parseFloat(newAmount);
+                        if (isNaN(updatedAmount) || updatedAmount < 0) {
+                            alert('অনুগ্রহ করে একটি বৈধ পরিমাণ প্রদান করুন!');
+                            return;
+                        }
+
+                        expenseRef.update({
+                            description: newDescription.trim() === '' ? expense.description : newDescription,
+                            date: newDate.trim() === '' ? expense.date : newDate,
+                            amount: updatedAmount
+                        })
+                        .then(() => {
+                            alert('খরচ সফলভাবে আপডেট করা হয়েছে!');
+                            // Refresh data
+                            fetchAndUpdate();
+                        })
+                        .catch((error) => {
+                            console.error("খরচ আপডেট করতে সমস্যা হয়েছে: ", error);
+                            alert('খরচ আপডেট করতে সমস্যা হয়েছে: ' + error.message);
+                        });
+                    } else {
+                        alert("এই খরচটি পাওয়া যায়নি!");
+                    }
+                }).catch((error) => {
+                    console.error("খরচ ডেটা আনতে সমস্যা হয়েছে: ", error);
+                    alert('খরচ ডেটা আনতে সমস্যা হয়েছে: ' + error.message);
+                });
+            }
+
+            /**
+             * Delete Expense
+             * @param {string} expenseId 
+             */
+            function deleteExpense(expenseId) {
+                if (confirm('আপনি কি এই খরচটি মুছে ফেলতে চান?')) {
+                    showLoading();
+                    db.collection("expenses").doc(expenseId).delete()
+                        .then(() => {
+                            alert('খরচ সফলভাবে মুছে ফেলা হয়েছে!');
+                            // Refresh data
+                            fetchAndUpdate();
+                            hideLoading();
+                        })
+                        .catch((error) => {
+                            hideLoading();
+                            console.error("খরচ মুছে ফেলতে সমস্যা হয়েছে: ", error);
+                            alert('খরচ মুছে ফেলতে সমস্যা হয়েছে: ' + error.message);
+                        });
+                }
+            }
+
+            /**
+             * Update Balance on Loan Taken
+             * @param {number} amount 
+             */
+            function updateBalanceOnLoanTaken(amount) {
+                let currentBalance = parseFloat(currentBalanceElem.textContent.replace(/,/g, '').replace('৳', '').trim()) || 0;
+                currentBalance -= amount;
+                currentBalanceElem.textContent = formatNumber(currentBalance);
+            }
+
+            /**
+             * Update Balance on Loan Repaid
+             * @param {number} amount 
+             */
+            function updateBalanceOnLoanRepaid(amount) {
+                let currentBalance = parseFloat(currentBalanceElem.textContent.replace(/,/g, '').replace('৳', '').trim()) || 0;
+                currentBalance += amount;
+                currentBalanceElem.textContent = formatNumber(currentBalance);
+            }
+
+            /**
+             * Update Report Card
+             * @param {number} year - নির্বাচিত বছর
+             * @param {number} month - নির্বাচিত মাস (0-11)
+             */
+            function updateReportCard(year, month) {
+                // Set current month name
+                const monthNames = ["জানুয়ারী","ফেব্রুয়ারী","মার্চ","এপ্রিল","মে","জুন",
+                                    "জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"];
+                currentMonthNameElem.textContent = monthNames[month];
+
+                // Define current month date range
+                const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+                const endMonth = month === 11 ? 0 : month + 1;
+                const endYear = month === 11 ? year + 1 : year;
+                const endDate = `${endYear}-${String(endMonth + 1).padStart(2, '0')}-01`;
+
+                // Compute 'A'
+                Promise.all([
+                    // Current month deposits
+                    db.collection("deposits")
+                        .where("date", ">=", startDate)
+                        .where("date", "<", endDate)
+                        .get(),
+                    // Current month expenses
+                    db.collection("expenses")
+                        .where("date", ">=", startDate)
+                        .where("date", "<", endDate)
+                        .get(),
+                    // Current month loans taken
+                    db.collection("loans")
+                        .where("date", ">=", startDate)
+                        .where("date", "<", endDate)
+                        .where("type", "==", "loan")
+                        .get()
+                ]).then(([depositsSnapshot, expensesSnapshot, loansSnapshot]) => {
+                    let currentDeposits = 0;
+                    depositsSnapshot.forEach((doc) => {
+                        const deposit = doc.data();
+                        currentDeposits += deposit.amount || 0;
+                    });
+
+                    let currentExpenses = 0;
+                    expensesSnapshot.forEach((doc) => {
+                        const expense = doc.data();
+                        currentExpenses += expense.amount || 0;
+                    });
+
+                    let currentLoansTaken = 0;
+                    loansSnapshot.forEach((doc) => {
+                        const loan = doc.data();
+                        currentLoansTaken += loan.amount || 0;
+                    });
+
+                    const A = currentDeposits - (currentExpenses + currentLoansTaken);
+                    balanceAElem.textContent = formatNumber(A);
+                    balanceAValueElem.textContent = formatNumber(A);
+
+                    // Compute 'B'
+                    // Define previous month date range
+                    let previousMonth = month - 1;
+                    let previousYear = year;
+                    if (previousMonth < 0) {
+                        previousMonth = 11;
+                        previousYear -= 1;
+                    }
+                    const previousStartDate = `${previousYear}-${String(previousMonth + 1).padStart(2, '0')}-01`;
+                    const previousEndMonth = previousMonth === 11 ? 0 : previousMonth + 1;
+                    const previousEndYear = previousMonth === 11 ? previousYear + 1 : previousYear;
+                    const previousEndDate = `${previousEndYear}-${String(previousEndMonth + 1).padStart(2, '0')}-01`;
+
+                    Promise.all([
+                        // Cumulative deposits up to previous month
+                        db.collection("deposits")
+                            .where("date", "<", startDate)
+                            .get(),
+                        // Cumulative expenses up to previous month
+                        db.collection("expenses")
+                            .where("date", "<", startDate)
+                            .get(),
+                        // Cumulative loans taken up to previous month
+                        db.collection("loans")
+                            .where("date", "<", startDate)
+                            .where("type", "==", "loan")
+                            .get(),
+                        // Cumulative loans repaid up to previous month
+                        db.collection("loans")
+                            .where("date", "<", startDate)
+                            .where("type", "==", "repayment")
+                            .get()
+                    ]).then(([cumulativeDepositsSnapshot, cumulativeExpensesSnapshot, cumulativeLoansTakenSnapshot, cumulativeLoansRepaidSnapshot]) => {
+                        let cumulativeDeposits = 0;
+                        cumulativeDepositsSnapshot.forEach((doc) => {
+                            const deposit = doc.data();
+                            cumulativeDeposits += deposit.amount || 0;
+                        });
+
+                        let cumulativeExpenses = 0;
+                        cumulativeExpensesSnapshot.forEach((doc) => {
+                            const expense = doc.data();
+                            cumulativeExpenses += expense.amount || 0;
+                        });
+
+                        let cumulativeLoansTaken = 0;
+                        cumulativeLoansTakenSnapshot.forEach((doc) => {
+                            const loan = doc.data();
+                            cumulativeLoansTaken += loan.amount || 0;
+                        });
+
+                        let cumulativeLoansRepaid = 0;
+                        cumulativeLoansRepaidSnapshot.forEach((doc) => {
+                            const loan = doc.data();
+                            cumulativeLoansRepaid += loan.amount || 0;
+                        });
+
+                        const previousB = cumulativeDeposits - (cumulativeExpenses + cumulativeLoansTaken) + cumulativeLoansRepaid;
+                        const B = previousB + A;
+                        balanceBElem.textContent = formatNumber(B);
+                        previousBalanceTextElem.textContent = `পূর্ববর্তী মাসের B (${monthNames[previousMonth]})`;
+                    }).catch((error) => {
+                        console.error("পূর্ববর্তী মাসের ডেটা ফেচ করতে সমস্যা হয়েছে: ", error);
+                    });
+                }).catch((error) => {
+                    console.error("বর্তমান মাসের ডেটা ফেচ করতে সমস্যা হয়েছে: ", error);
+                });
+            }
+
+            /**
+             * Update Statistics
+             */
+            function updateStatistics() {
+                showLoading();
+                // Calculate Total Income
+                db.collection("deposits").get().then((querySnapshot) => {
+                    let totalIncome = 0;
+                    querySnapshot.forEach((doc) => {
+                        const deposit = doc.data();
+                        if (deposit.amount) {
+                            totalIncome += deposit.amount;
+                        }
+                    });
+                    totalIncomeElem.textContent = formatNumber(totalIncome);
+
+                    // Calculate Total Expense
+                    db.collection("expenses").get().then((querySnapshot) => {
+                        let totalExpense = 0;
+                        querySnapshot.forEach((doc) => {
+                            const expense = doc.data();
+                            if (expense.amount) {
+                                totalExpense += expense.amount;
+                            }
+                        });
+                        totalExpenseElem.textContent = formatNumber(totalExpense);
+
+                        // Calculate Total Loan Taken and Repaid
+                        db.collection("loans").get().then((querySnapshot) => {
+                            let totalLoanTaken = 0;
+                            let totalLoanRepaid = 0;
+                            querySnapshot.forEach((doc) => {
+                                const loan = doc.data();
+                                if (loan.type === "loan") {
+                                    totalLoanTaken += loan.amount;
+                                } else if (loan.type === "repayment") {
+                                    totalLoanRepaid += loan.amount;
+                                }
+                            });
+
+                            // Calculate Current Balance
+                            const currentBalance = totalIncome - totalExpense - totalLoanTaken + totalLoanRepaid;
+                            currentBalanceElem.textContent = formatNumber(currentBalance);
+                            hideLoading();
+                        }).catch((error) => {
+                            console.error("লোন ফেচ করতে সমস্যা হয়েছে: ", error);
+                            hideLoading();
+                        });
+                    }).catch((error) => {
+                        console.error("খরচ ফেচ করতে সমস্যা হয়েছে: ", error);
+                        hideLoading();
+                    });
+                }).catch((error) => {
+                    console.error("জমা ফেচ করতে সমস্যা হয়েছে: ", error);
+                    hideLoading();
+                });
+            }
+
+            /**
+             * Format Number with Commas and Currency Symbol
+             * @param {number} num 
+             * @returns {string}
+             */
+            function formatNumber(num) {
+                return `৳ ${num.toLocaleString('en-US')}`;
+            }
+
+            /**
+             * Format Date to Bengali Month Names
+             * @param {string} dateStr 
+             * @returns {string}
+             */
+            function formatDate(dateStr) {
+                const months = ["জানুয়ারী","ফেব্রুয়ারী","মার্চ","এপ্রিল","মে","জুন",
+                                "জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"];
+                const date = new Date(dateStr);
+                const day = date.getDate();
+                const month = months[date.getMonth()];
+                const year = date.getFullYear();
+                return `${day} ${month}, ${year}`;
+            }
+
+            /**
+             * Initialize Default Expenses on App Load
+             */
+            function initializeDefaultExpensesOnLoad() {
+                initializeDefaultExpenses()
+                    .then(() => {
+                        fetchAndUpdate();
+                    })
+                    .catch((error) => {
+                        console.error("ডিফল্ট খরচ ইনিশিয়ালাইজ করতে সমস্যা হয়েছে: ", error);
+                    });
+            }
+
+            /**
+             * Populate Year Selector
+             */
+            function populateYearSelector() {
+                const currentYear = new Date().getFullYear();
+                const startYear = currentYear - 5;
+                const endYear = currentYear + 5;
+                for (let year = startYear; year <= endYear; year++) {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearSelector.appendChild(option);
+                }
+                // Set default to current year
+                yearSelector.value = currentYear;
+            }
+
+            /**
+             * Set Default Selectors to Current Month and Year
+             */
+            function setDefaultSelectors() {
+                const now = new Date();
+                monthSelector.value = now.getMonth();
+                yearSelector.value = now.getFullYear();
+            }
+
+            /**
+             * Add Event Listeners to Selectors
+             */
+            function addSelectorsEventListeners() {
+                monthSelector.addEventListener('change', fetchAndUpdate);
+                yearSelector.addEventListener('change', fetchAndUpdate);
+            }
+
+            /**
+             * Fetch and Update Data Based on Selected Month and Year
+             */
+            function fetchAndUpdate() {
+                const selectedMonth = parseInt(monthSelector.value);
+                const selectedYear = parseInt(yearSelector.value);
+                fetchDeposits(selectedYear, selectedMonth);
+                fetchExpenses(selectedYear, selectedMonth);
+                fetchLoans(selectedYear, selectedMonth);
+                updateReportCard(selectedYear, selectedMonth);
+                updateStatistics();
+            }
+
+            /**
+             * Show Loading Indicator
+             */
+            function showLoading() {
+                loadingIndicator.classList.remove('d-none');
+            }
+
+            /**
+             * Hide Loading Indicator
+             */
+            function hideLoading() {
+                loadingIndicator.classList.add('d-none');
+            }
+
+            /**
+             * Logout Function
+             */
+            function logout() {
+                auth.signOut().then(() => {
+                    alert('সফলভাবে লগআউট করা হয়েছে!');
+                    window.location.href = "index.html"; // লগইন পেজে রিডাইরেক্ট
+                }).catch((error) => {
+                    console.error("লগআউট করতে সমস্যা হয়েছে: ", error);
+                    alert('লগআউট করতে সমস্যা হয়েছে: ' + error.message);
+                });
+            }
+
+            /**
+             * Initialize the App on Window Load
+             */
+            window.onload = function() {
+                populateYearSelector();
+                setDefaultSelectors();
+                addSelectorsEventListeners();
+                fetchMembers();
+                initializeDefaultExpensesOnLoad();
+                setupAuthListener();
+
+                // Mobile Navbar Toggle
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                });
+            };
+
+            /**
+             * Setup Authentication Listener
+             */
+            function setupAuthListener() {
+                auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        // User is signed in
+                        userNameElem.textContent = user.displayName || "ব্যবহারকারী";
+                        if (user.photoURL) {
+                            userImageElem.src = user.photoURL;
+                        } else {
+                            userImageElem.src = "https://via.placeholder.com/35"; // Default image
+                        }
+
+                        // Fetch user role from Firestore
+                        db.collection("users").doc(user.uid).get().then((doc) => {
+                            if (doc.exists) {
+                                const userRole = doc.data().role || 'user';
+                                console.log(`User role fetched: ${userRole}`);
+                                if (userRole !== 'admin') {
+                                    alert('দুঃখিত, এই পেজটি শুধুমাত্র অ্যাডমিনের জন্য।');
+                                    logout();
+                                }
+                            } else {
+                                console.log("User document does not exist. Defaulting role to 'user'.");
+                                logout();
+                            }
+                        }).catch((error) => {
+                            console.error("ইউজারের রোল ফেচ করতে সমস্যা হয়েছে: ", error);
+                            logout();
+                        });
+                    } else {
+                        // No user is signed in
+                        userNameElem.textContent = "ব্যবহারকারী";
+                        userImageElem.src = "https://via.placeholder.com/35"; // Default image
+                        // Redirect to login page if not authenticated
+                        window.location.href = "index.html";
+                    }
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>
